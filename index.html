@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>สต็อกสินค้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f4fc;--card:#fff;--ink:#2b2a3a;--sub:#6f6d86;--line:#e9e4f4;--accent:#8e83d9;
+--mint:#dff5ea;--mint-ink:#2c7a57;--butter:#fff3cf;--butter-ink:#7d5a0c;--peach:#ffe1d6;--peach-ink:#a63f2a;--lilac:#ece7fb;--sky:#e2f1fc;--rose:#b8465c;--pink:#fcd5de}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai",system-ui,sans-serif;line-height:1.6;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 32px}
+header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#e7e0fa,#dff3ec)}
+h1{font-size:20px;font-weight:700;margin:0}
+.upd{font-size:12px;color:#5b5970}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
+.w3{grid-column:span 3}.w2{grid-column:span 2}
+.kpi .u{font-size:12px;font-weight:400;color:#5b5970}
+.kpi{border:2px solid transparent;border-radius:16px;padding:10px 14px;text-align:left;font:inherit;color:var(--ink);cursor:pointer;background:var(--card)}
+.kpi small{display:block;font-size:12px;color:#5b5970}
+.kpi b{font-size:22px;font-weight:700}
+.k1{background:var(--sky)}.k2{background:var(--lilac)}.kpi.low{background:var(--butter)}.kpi.crit{background:var(--peach)}.kpi.out{background:var(--pink)}
+.kpi.low b{color:var(--butter-ink)}.kpi.crit b{color:var(--peach-ink)}.kpi.out b{color:var(--rose)}
+.w2{padding:10px 12px}
+.kpi.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(142,131,217,.25)}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+input,select{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:8px 12px;min-height:42px}
+input{flex:1;min-width:0}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 14px;font:inherit;font-size:13px;cursor:pointer}
+.chip.on{background:#4a4380;border-color:#4a4380;color:#fff}
+.count{font-size:12px;color:var(--sub);margin:4px 2px 8px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+details{border-bottom:1px solid var(--line)}
+details:last-child{border-bottom:0}
+details[open]{background:#fcfbff}
+summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px}
+summary::-webkit-details-marker{display:none}
+.thumb{position:relative;flex:none;width:54px;height:54px;border-radius:14px;background:var(--lilac);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.info{flex:1;min-width:0}
+.name{font-weight:500;font-size:14px;line-height:1.4}
+.meta{font-size:12px;color:var(--sub)}
+.right{text-align:right;flex:none}
+.qty{font-weight:700;font-size:16px}
+.qty small{font-weight:400;font-size:11px;color:var(--sub)}
+.tag{display:inline-block;font-size:11px;border-radius:999px;padding:0 9px}
+.s-ok{background:var(--mint);color:var(--mint-ink)}.s-low{background:var(--butter);color:var(--butter-ink)}.s-crit{background:var(--peach);color:var(--peach-ink)}.s-out{background:var(--rose);color:#fff}.s-na{background:var(--lilac);color:var(--sub)}
+.more{padding:2px 14px 12px;font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:2px 14px;color:var(--sub)}
+.more b{font-weight:500;color:var(--ink);text-align:right;word-break:break-all}
+.empty,.err{padding:28px 16px;text-align:center;color:var(--sub);font-size:14px}
+.err{color:var(--peach-ink)}
+.demo{font-size:12px;background:var(--butter);color:var(--butter-ink);border-radius:12px;padding:6px 12px;margin-bottom:10px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>สต็อกสินค้า</h1><span class="upd" id="upd"></span></header>
+  <div id="demo" class="demo" hidden>กำลังแสดงข้อมูลตัวอย่าง ใส่ API_URL ในไฟล์เพื่อดึงข้อมูลจาก Google Sheet</div>
+  <div class="kpis" id="kpis"></div>
+  <div class="tools">
+    <input id="q" type="search" placeholder="ค้นหาชื่อ รหัส หรือบาร์โค้ด" aria-label="ค้นหาสินค้า">
+    <select id="sort" aria-label="เรียงลำดับ">
+      <option value="urgent">เร่งด่วนก่อน</option>
+      <option value="name">ชื่อ ก-ฮ</option>
+      <option value="qty">คงเหลือน้อยสุด</option>
+      <option value="rate">ขายดีสุด</option>
+    </select>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="count" id="count"></div>
+  <div class="list" id="list"><div class="empty">กำลังโหลดข้อมูล…</div></div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const CONFIG = {
+  LIFF_ID: '',   // ใส่ LIFF ID จาก LINE Developers Console
+  API_URL: 'https://script.google.com/macros/s/AKfycbyuyJihju1chsRTM9Htbemfv9IeD0OnFhc7YlcO2RJg9fW_WMk3HB61eb2txTPmC8QLrw/exec'    // ใส่ URL ของ Apps Script Web app (ลงท้ายด้วย /exec)
+};
+
+const DEMO = [
+  {"รหัสสินค้า": "65WAWO211X106EO(24) ", "Barcode": 8857127849010, "Barcode (P.12)": "-", "Barcode (P.24)": 18857127849109, "Barcode (P.48)": "-", "Code": "CJ-1", "ชื่อสินค้า": "แคทเทสต์ กป. ทูน่าเยลลี่", "สิงหาคม": 23, "กันยายน": 8, "ตุลาคม": 13, "เฉลี่ย 3 เดือนย้อนหลัง": 14.67, "คงเหลือพร้อมขาย": 25, "เฉลี่ยขาย/วัน": 0.49, "จำนวนวันขาย": 51.14, "สถานะ": "ปกติ"},
+  {"รหัสสินค้า": "MPCABS5WON95X170(48) ", "Barcode": 8857127849386, "Barcode (P.12)": 28857127849618, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849649, "Code": "ST-1", "ชื่อสินค้า": "แคทเทสต์ ปลาทูน่าแท่ง รสทูน่า", "สิงหาคม": 64, "กันยายน": 54, "ตุลาคม": 158, "เฉลี่ย 3 เดือนย้อนหลัง": 92, "คงเหลือพร้อมขาย": 48, "เฉลี่ยขาย/วัน": 3.07, "จำนวนวันขาย": 15.65, "สถานะ": "ใกล้หมด"},
+  {"รหัสสินค้า": "MPCABS5SLN95X170(48) ", "Barcode": 8857127849409, "Barcode (P.12)": 28857127849632, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849663, "Code": "ST-3", "ชื่อสินค้า": "แคทเทสต์ ปลาทูน่าแท่ง รสหอยเชลล์", "สิงหาคม": 24, "กันยายน": 23, "ตุลาคม": 136, "เฉลี่ย 3 เดือนย้อนหลัง": 61, "คงเหลือพร้อมขาย": 0, "เฉลี่ยขาย/วัน": 2.03, "จำนวนวันขาย": 0, "สถานะ": "หมด"},
+  {"รหัสสินค้า": "671MCV95X145X25(48) ", "Barcode": 8857127849232, "Barcode (P.12)": 28857127849311, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849335, "Code": "KT-1", "ชื่อสินค้า": "แคทเทสต์ เพาช์ มูสปลาทูน่าและไก่สูตรลูกแมว", "สิงหาคม": 49, "กันยายน": 119, "ตุลาคม": 160, "เฉลี่ย 3 เดือนย้อนหลัง": 109.33, "คงเหลือพร้อมขาย": 8, "เฉลี่ยขาย/วัน": 3.64, "จำนวนวันขาย": 2.2, "สถานะ": "วิกฤต"},
+  {"รหัสสินค้า": "67WAWO95X145X25(48) ", "Barcode": 8857127849102, "Barcode (P.12)": 28857127849014, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849144, "Code": "J-1", "ชื่อสินค้า": "แคทเทสต์ เพาช์ ทูน่าเยลลี่", "สิงหาคม": 483, "กันยายน": 539, "ตุลาคม": 803, "เฉลี่ย 3 เดือนย้อนหลัง": 608.33, "คงเหลือพร้อมขาย": 280, "เฉลี่ยขาย/วัน": 20.28, "จำนวนวันขาย": 13.81, "สถานะ": "วิกฤต"},
+  {"รหัสสินค้า": "67WABA95X145X25(48) ", "Barcode": 8857127849188, "Barcode (P.12)": 28857127849090, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849229, "Code": "HT-1", "ชื่อสินค้า": "แคทเทสต์ เฮลตี้ ทูน่าเยลลี่(มะเขือเทศ)", "สิงหาคม": 311, "กันยายน": 307, "ตุลาคม": 415, "เฉลี่ย 3 เดือนย้อนหลัง": 344.33, "คงเหลือพร้อมขาย": 239, "เฉลี่ยขาย/วัน": 11.48, "จำนวนวันขาย": 20.82, "สถานะ": "ใกล้หมด"},
+  {"รหัสสินค้า": null, "Barcode": 8857127849614, "Barcode (P.12)": 28857127849892, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849953, "Code": "VJ-1", "ชื่อสินค้า": "แคทเทสต์ แวลูมีล ทูน่าในเยลลี่ 60g.", "สิงหาคม": 0, "กันยายน": 0, "ตุลาคม": 0, "เฉลี่ย 3 เดือนย้อนหลัง": 0, "คงเหลือพร้อมขาย": 0, "เฉลี่ยขาย/วัน": 0, "จำนวนวันขาย": "0", "สถานะ": "ปกติ"},
+  {"รหัสสินค้า": "675BA7O95X145X25(48) ", "Barcode": 8857127849669, "Barcode (P.12)": 28857127849946, "Barcode (P.24)": "-", "Barcode (P.48)": 38857127849004, "Code": "VG-2", "ชื่อสินค้า": "แคทเทสต์ แวลูมีล ทูน่าแซลมอนในเกรวี่ 60g.", "สิงหาคม": 228, "กันยายน": 263, "ตุลาคม": 377, "เฉลี่ย 3 เดือนย้อนหลัง": 289.33, "คงเหลือพร้อมขาย": 314, "เฉลี่ยขาย/วัน": 9.64, "จำนวนวันขาย": 32.56, "สถานะ": "ปกติ"}
+];
+
+const STATUS = {'ปรกติ':'ok','ปกติ':'ok','ใกล้หมด':'low','วิกฤต':'crit','หมด':'out'};
+const RANK = {out:0, crit:1, low:2, ok:3, na:4};
+const state = {items:[], status:'all', q:'', sort:'urgent'};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => Number(String(v ?? '').replace(/,/g, '')) || 0;
+const fmt = n => Number(n || 0).toLocaleString('th-TH', {maximumFractionDigits: 0});
+const fmt1 = n => Number(n || 0).toLocaleString('th-TH', {maximumFractionDigits: 1});
+const clean = v => { const s = String(v ?? '').replace(/\u00a0/g,' ').trim(); return (s === '' || s === '-') ? '' : s; };
+
+function imgUrl(v){
+  const u = clean(v); if(!u) return '';
+  const m = u.match(/drive\.google\.com\/file\/d\/([\w-]+)/) || u.match(/drive\.google\.com\/(?:open|uc)\?[^#]*id=([\w-]+)/);
+  return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w400' : u;
+}
+
+function normalize(r){
+  const keys = Object.keys(r), a = keys.indexOf('ชื่อสินค้า'), b = keys.indexOf('เฉลี่ย 3 เดือนย้อนหลัง');
+  const months = (a >= 0 && b > a) ? keys.slice(a + 1, b).map(k => ({m: k, v: num(r[k])})) : [];
+  const label = String(r['สถานะ'] || '').trim();
+  return {
+    pid: clean(r['รหัสสินค้า']), code: clean(r['Code']), name: clean(r['ชื่อสินค้า']) || '(ไม่มีชื่อ)',
+    bc: clean(r['Barcode']), bc12: clean(r['Barcode (P.12)']), bc24: clean(r['Barcode (P.24)']), bc48: clean(r['Barcode (P.48)']),
+    avg3m: num(r['เฉลี่ย 3 เดือนย้อนหลัง']), qty: num(r['คงเหลือพร้อมขาย']),
+    rate: num(r['เฉลี่ยขาย/วัน']), days: num(r['จำนวนวันขาย']),
+    months: months,
+    img: imgUrl(r['URL รูป'] || r['รูป'] || r['Image']),
+    label: label, status: STATUS[label] || 'na'
+  };
+}
+
+function filtered(){
+  const q = state.q.trim().toLowerCase();
+  const rows = state.items.filter(p => {
+    const sOk = state.status === 'all' || p.status === state.status || (state.status === 'warn' && (p.status === 'low' || p.status === 'crit'));
+    const text = [p.name, p.pid, p.code, p.bc, p.bc12, p.bc24, p.bc48].join(' ').toLowerCase();
+    return sOk && (!q || text.includes(q));
+  });
+  const by = {
+    urgent:(a,b)=>RANK[a.status]-RANK[b.status] || a.days-b.days,
+    name:(a,b)=>a.name.localeCompare(b.name,'th'),
+    qty:(a,b)=>a.qty-b.qty,
+    rate:(a,b)=>b.rate-a.rate
+  };
+  return rows.sort(by[state.sort]);
+}
+
+function renderKpis(){
+  const all = state.items, n = s => all.filter(p=>p.status===s).length;
+  const units = all.reduce((s,p)=>s+p.qty, 0);
+  const tiles = [
+    ['all','สินค้าทั้งหมด',fmt(all.length),'รายการ','k1 w3'],
+    ['units','พร้อมขายรวม',fmt(units),'กล่อง','k2 w3'],
+    ['low','ใกล้หมด',fmt(n('low')),'รายการ','low w2'],
+    ['crit','วิกฤต',fmt(n('crit')),'รายการ','crit w2'],
+    ['out','หมดแล้ว',fmt(n('out')),'รายการ','out w2']
+  ];
+  $('kpis').innerHTML = tiles.map(t =>
+    `<button class="kpi ${t[4]} ${state.status===t[0]?'on':''}" data-s="${t[0]}"><small>${t[1]}</small><b>${t[2]}</b> <span class="u">${t[3]}</span></button>`).join('');
+}
+
+function renderChips(){
+  const defs = [['all','ทั้งหมด'],['ok','ปกติ'],['low','ใกล้หมด'],['crit','วิกฤต'],['out','หมด']];
+  $('chips').innerHTML = defs.map(d => {
+    const c = d[0]==='all' ? state.items.length : state.items.filter(p=>p.status===d[0]).length;
+    return `<button class="chip ${state.status===d[0]?'on':''}" data-s="${d[0]}">${d[1]} ${fmt(c)}</button>`;
+  }).join('');
+}
+
+function detail(label, value){ return value ? `<span>${label}</span><b>${esc(value)}</b>` : ''; }
+
+function renderList(){
+  const rows = filtered();
+  $('count').textContent = `แสดง ${fmt(rows.length)} จากทั้งหมด ${fmt(state.items.length)} รายการ`;
+  if(!rows.length){ $('list').innerHTML = '<div class="empty">ไม่พบสินค้าที่ตรงกับตัวกรอง ลองล้างคำค้นหาหรือเลือกสถานะอื่น</div>'; return; }
+  $('list').innerHTML = rows.map(p => `
+    <details>
+      <summary>
+        <div class="thumb">📦${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</div>
+        <div class="info"><div class="name">${esc(p.name)}</div>
+          <div class="meta">${esc(p.code)}${p.code && p.rate ? ' · ' : ''}${p.rate ? 'ขายเฉลี่ย ' + fmt1(p.rate) + '/วัน' : ''}${p.qty > 0 && p.days ? ' · พอขาย ~' + fmt(p.days) + ' วัน' : ''}</div></div>
+        <div class="right"><div class="qty">${fmt(p.qty)} <small>กล่อง</small></div><span class="tag s-${p.status}">${esc(p.label || 'ไม่ระบุ')}</span></div>
+      </summary>
+      <div class="more">
+        ${detail('รหัสสินค้า', p.pid)}${detail('Code', p.code)}${detail('Barcode', p.bc)}
+        ${detail('Barcode (P.12)', p.bc12)}${detail('Barcode (P.24)', p.bc24)}${detail('Barcode (P.48)', p.bc48)}
+        ${p.months.map(x => detail('ยอดขาย ' + x.m, fmt(x.v))).join('')}${detail('เฉลี่ย 3 เดือนย้อนหลัง', fmt1(p.avg3m))}
+      </div>
+    </details>`).join('');
+}
+
+function render(){ renderKpis(); renderChips(); renderList(); }
+
+$('kpis').addEventListener('click', e => {
+  const b = e.target.closest('.kpi'); if(!b) return;
+  const s = b.dataset.s;
+  state.status = (s === 'units' || s === state.status) ? 'all' : s;
+  render();
+});
+$('chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if(!b) return;
+  state.status = b.dataset.s; render();
+});
+$('q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
+$('sort').addEventListener('change', e => { state.sort = e.target.value; renderList(); });
+
+async function load(){
+  try{
+    if(CONFIG.LIFF_ID){ await liff.init({liffId: CONFIG.LIFF_ID}); }
+  }catch(err){ console.warn('LIFF init failed', err); }
+  try{
+    let rows, updated = new Date();
+    if(CONFIG.API_URL){
+      const res = await fetch(CONFIG.API_URL);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      rows = data.products || [];
+      if(data.updatedAt) updated = new Date(data.updatedAt);
+    }else{
+      rows = DEMO; $('demo').hidden = false;
+    }
+    state.items = rows.map(normalize);
+    $('upd').textContent = 'อัปเดต ' + updated.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) + ' น.';
+    render();
+  }catch(err){
+    $('list').innerHTML = '<div class="err">โหลดข้อมูลไม่สำเร็จ ตรวจสอบ API_URL และสิทธิ์ของ Web app แล้วลองใหม่</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
