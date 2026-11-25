@@ -52,14 +52,12 @@ summary::-webkit-details-marker{display:none}
 .more b{font-weight:500;color:var(--ink);text-align:right;word-break:break-all}
 .empty,.err{padding:28px 16px;text-align:center;color:var(--sub);font-size:14px}
 .err{color:var(--peach-ink)}
-.demo{font-size:12px;background:var(--butter);color:var(--butter-ink);border-radius:12px;padding:6px 12px;margin-bottom:10px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header><h1>สต็อกสินค้า</h1><span class="upd" id="upd"></span></header>
-  <div id="demo" class="demo" hidden>กำลังแสดงข้อมูลตัวอย่าง ใส่ API_URL ในไฟล์เพื่อดึงข้อมูลจาก Google Sheet</div>
   <div class="kpis" id="kpis"></div>
   <div class="tools">
     <input id="q" type="search" placeholder="ค้นหาชื่อ รหัส หรือบาร์โค้ด" aria-label="ค้นหาสินค้า">
@@ -78,7 +76,7 @@ summary::-webkit-details-marker{display:none}
 <script src="https://line-scdn.net"></script>
 <script>
 const CONFIG = {
-  LIFF_ID: '',   // ใส่ LIFF ID จาก LINE Developers Console (ถ้ามี)
+  LIFF_ID: '',
   API_URL: 'https://google.com'
 };
 
@@ -98,13 +96,13 @@ function fmtNum(n, dec = 0) {
   return num.toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 }
 
-function getImgUrl(item) {
-  // 1. ดึงจากคอลัมน์ "รูปภาพ" หรือ "image" ใน Google Sheet ก่อน
-  const sheetImg = (item['รูปภาพ'] || item['Image'] || item['image'] || '').toString().trim();
-  if (sheetImg) return sheetImg;
-  // 2. ถ้าใน Sheet ไม่มี จะดึงไฟล์รูปชื่อตาม Code จาก GitHub (เช่น ./CJ-1.jpg)
-  const code = (item['Code'] || '').toString().trim();
-  return code ? `./${code}.jpg` : '';
+function handleImgError(img, code) {
+  if (!img.dataset.triedPng && code) {
+    img.dataset.triedPng = '1';
+    img.src = `./${code}.png`;
+  } else {
+    img.remove();
+  }
 }
 
 function renderKPIs() {
@@ -116,7 +114,7 @@ function renderKPIs() {
 
   const kpis = [
     { key: 'ทั้งหมด', cls: 'k1 w3', label: 'รายการทั้งหมด', val: fmtNum(totalSku), unit: 'รายการ' },
-    { key: 'ทั้งหมด', cls: 'k2 w3', label: 'คงเหลือรวม', val: fmtNum(totalQty), unit: 'ชิ้น' },
+    { key: 'ทั้งหมด', cls: 'k2 w3', label: 'คงเหลือรวม', val: fmtNum(totalQty), unit: 'กล่อง' },
     { key: 'ใกล้หมด', cls: 'low w2', label: 'ใกล้หมด', val: fmtNum(cLow), unit: 'รายการ' },
     { key: 'วิกฤต', cls: 'crit w2', label: 'วิกฤต', val: fmtNum(cCrit), unit: 'รายการ' },
     { key: 'หมด', cls: 'out w2', label: 'สินค้าหมด', val: fmtNum(cOut), unit: 'รายการ' }
@@ -132,10 +130,10 @@ function renderKPIs() {
 }
 
 function renderChips() {
-  const tabs = ['ทั้งหมด', 'วิกฤต', 'ใกล้หมด', 'หมด', 'ปกติ'];
+  const tabs = ['ทั้งหมด', 'ปกติ', 'ใกล้หมด', 'วิกฤต', 'หมด'];
   document.getElementById('chips').innerHTML = tabs.map(t => {
     const cnt = t === 'ทั้งหมด' ? allItems.length : allItems.filter(x => x['สถานะ'] === t).length;
-    return `<button type="button" class="chip ${state.status === t ? 'on' : ''}" onclick="setFilter('${t}')">${t} (${cnt})</button>`;
+    return `<button type="button" class="chip ${state.status === t ? 'on' : ''}" onclick="setFilter('${t}')">${t} ${cnt}</button>`;
   }).join('');
 }
 
@@ -168,7 +166,7 @@ function renderList() {
     return 0;
   });
 
-  document.getElementById('count').textContent = `แสดง ${items.length} จาก ${allItems.length} รายการ`;
+  document.getElementById('count').textContent = `แสดง ${items.length} จากทั้งหมด ${allItems.length} รายการ`;
 
   const listEl = document.getElementById('list');
   if (!items.length) {
@@ -179,14 +177,23 @@ function renderList() {
   listEl.innerHTML = items.map(item => {
     const st = item['สถานะ'] || 'ปกติ';
     const meta = STATUS_META[st] || { cls: 's-na' };
-    const imgUrl = getImgUrl(item);
-    const imgTag = imgUrl ? `<img src="${imgUrl}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    const code = (item['Code'] || '').toString().trim();
+    const sheetImg = (item['รูปภาพ'] || item['Image'] || item['image'] || '').toString().trim();
+    const imgSrc = sheetImg || (code ? `./${code}.jpg` : '');
+    const imgTag = imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="handleImgError(this, '${code}')">` : '';
+    const daysText = Number(item['จำนวนวันขาย']) > 0 ? ` • พอขาย ~${fmtNum(item['จำนวนวันขาย'], 0)} วัน` : '';
 
     return `<details>
       <summary>
         <div class="thumb">📦${imgTag}</div>
         <div class="info">
           <div class="name">${item['ชื่อสินค้า'] || '-'}</div>
-          <div class="meta">${item['Code'] || '-'} • ขายเฉลี่ย ${fmtNum(item['เฉลี่ยขาย/วัน'], 1)}/วัน (${fmtNum(item['จำนวนวันขาย'], 0)} วัน)</div>
+          <div class="meta">${code || '-'} • ขายเฉลี่ย ${fmtNum(item['เฉลี่ยขาย/วัน'], 1)}/วัน${daysText}</div>
         </div>
         <div class="right">
+          <div class="qty">${fmtNum(item['คงเหลือพร้อมขาย'])} <small>กล่อง</small></div>
+          <span class="tag ${meta.cls}">${st}</span>
+        </div>
+      </summary>
+      <div class="more">
+        <span>รหัสสินค้า</span><b>${(item['รหัสสินค้า'] || '-').toString().trim() || '-'}</b>
