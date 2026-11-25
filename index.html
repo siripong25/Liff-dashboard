@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>สต็อกสินค้า</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://googleapis.com">
+<link href="https://googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f7f4fc;--card:#fff;--ink:#2b2a3a;--sub:#6f6d86;--line:#e9e4f4;--accent:#8e83d9;
 --mint:#dff5ea;--mint-ink:#2c7a57;--butter:#fff3cf;--butter-ink:#7d5a0c;--peach:#ffe1d6;--peach-ink:#a63f2a;--lilac:#ece7fb;--sky:#e2f1fc;--rose:#b8465c;--pink:#fcd5de}
@@ -39,7 +39,7 @@ details[open]{background:#fcfbff}
 summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px}
 summary::-webkit-details-marker{display:none}
 .thumb{position:relative;flex:none;width:54px;height:54px;border-radius:14px;background:var(--lilac);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
-.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
 .info{flex:1;min-width:0}
 .name{font-weight:500;font-size:14px;line-height:1.4}
 .meta{font-size:12px;color:var(--sub)}
@@ -75,153 +75,118 @@ summary::-webkit-details-marker{display:none}
   <div class="list" id="list"><div class="empty">กำลังโหลดข้อมูล…</div></div>
 </div>
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://line-scdn.net"></script>
 <script>
 const CONFIG = {
-  LIFF_ID: '',   // ใส่ LIFF ID จาก LINE Developers Console
-  API_URL: 'https://script.google.com/macros/s/AKfycbyuyJihju1chsRTM9Htbemfv9IeD0OnFhc7YlcO2RJg9fW_WMk3HB61eb2txTPmC8QLrw/exec'    // ใส่ URL ของ Apps Script Web app (ลงท้ายด้วย /exec)
+  LIFF_ID: '',   // ใส่ LIFF ID จาก LINE Developers Console (ถ้ามี)
+  API_URL: 'https://google.com'
 };
 
-const DEMO = [
-  {"รหัสสินค้า": "65WAWO211X106EO(24) ", "Barcode": 8857127849010, "Barcode (P.12)": "-", "Barcode (P.24)": 18857127849109, "Barcode (P.48)": "-", "Code": "CJ-1", "ชื่อสินค้า": "แคทเทสต์ กป. ทูน่าเยลลี่", "สิงหาคม": 23, "กันยายน": 8, "ตุลาคม": 13, "เฉลี่ย 3 เดือนย้อนหลัง": 14.67, "คงเหลือพร้อมขาย": 25, "เฉลี่ยขาย/วัน": 0.49, "จำนวนวันขาย": 51.14, "สถานะ": "ปกติ"},
-  {"รหัสสินค้า": "MPCABS5WON95X170(48) ", "Barcode": 8857127849386, "Barcode (P.12)": 28857127849618, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849649, "Code": "ST-1", "ชื่อสินค้า": "แคทเทสต์ ปลาทูน่าแท่ง รสทูน่า", "สิงหาคม": 64, "กันยายน": 54, "ตุลาคม": 158, "เฉลี่ย 3 เดือนย้อนหลัง": 92, "คงเหลือพร้อมขาย": 48, "เฉลี่ยขาย/วัน": 3.07, "จำนวนวันขาย": 15.65, "สถานะ": "ใกล้หมด"},
-  {"รหัสสินค้า": "MPCABS5SLN95X170(48) ", "Barcode": 8857127849409, "Barcode (P.12)": 28857127849632, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849663, "Code": "ST-3", "ชื่อสินค้า": "แคทเทสต์ ปลาทูน่าแท่ง รสหอยเชลล์", "สิงหาคม": 24, "กันยายน": 23, "ตุลาคม": 136, "เฉลี่ย 3 เดือนย้อนหลัง": 61, "คงเหลือพร้อมขาย": 0, "เฉลี่ยขาย/วัน": 2.03, "จำนวนวันขาย": 0, "สถานะ": "หมด"},
-  {"รหัสสินค้า": "671MCV95X145X25(48) ", "Barcode": 8857127849232, "Barcode (P.12)": 28857127849311, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849335, "Code": "KT-1", "ชื่อสินค้า": "แคทเทสต์ เพาช์ มูสปลาทูน่าและไก่สูตรลูกแมว", "สิงหาคม": 49, "กันยายน": 119, "ตุลาคม": 160, "เฉลี่ย 3 เดือนย้อนหลัง": 109.33, "คงเหลือพร้อมขาย": 8, "เฉลี่ยขาย/วัน": 3.64, "จำนวนวันขาย": 2.2, "สถานะ": "วิกฤต"},
-  {"รหัสสินค้า": "67WAWO95X145X25(48) ", "Barcode": 8857127849102, "Barcode (P.12)": 28857127849014, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849144, "Code": "J-1", "ชื่อสินค้า": "แคทเทสต์ เพาช์ ทูน่าเยลลี่", "สิงหาคม": 483, "กันยายน": 539, "ตุลาคม": 803, "เฉลี่ย 3 เดือนย้อนหลัง": 608.33, "คงเหลือพร้อมขาย": 280, "เฉลี่ยขาย/วัน": 20.28, "จำนวนวันขาย": 13.81, "สถานะ": "วิกฤต"},
-  {"รหัสสินค้า": "67WABA95X145X25(48) ", "Barcode": 8857127849188, "Barcode (P.12)": 28857127849090, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849229, "Code": "HT-1", "ชื่อสินค้า": "แคทเทสต์ เฮลตี้ ทูน่าเยลลี่(มะเขือเทศ)", "สิงหาคม": 311, "กันยายน": 307, "ตุลาคม": 415, "เฉลี่ย 3 เดือนย้อนหลัง": 344.33, "คงเหลือพร้อมขาย": 239, "เฉลี่ยขาย/วัน": 11.48, "จำนวนวันขาย": 20.82, "สถานะ": "ใกล้หมด"},
-  {"รหัสสินค้า": null, "Barcode": 8857127849614, "Barcode (P.12)": 28857127849892, "Barcode (P.24)": "-", "Barcode (P.48)": 28857127849953, "Code": "VJ-1", "ชื่อสินค้า": "แคทเทสต์ แวลูมีล ทูน่าในเยลลี่ 60g.", "สิงหาคม": 0, "กันยายน": 0, "ตุลาคม": 0, "เฉลี่ย 3 เดือนย้อนหลัง": 0, "คงเหลือพร้อมขาย": 0, "เฉลี่ยขาย/วัน": 0, "จำนวนวันขาย": "0", "สถานะ": "ปกติ"},
-  {"รหัสสินค้า": "675BA7O95X145X25(48) ", "Barcode": 8857127849669, "Barcode (P.12)": 28857127849946, "Barcode (P.24)": "-", "Barcode (P.48)": 38857127849004, "Code": "VG-2", "ชื่อสินค้า": "แคทเทสต์ แวลูมีล ทูน่าแซลมอนในเกรวี่ 60g.", "สิงหาคม": 228, "กันยายน": 263, "ตุลาคม": 377, "เฉลี่ย 3 เดือนย้อนหลัง": 289.33, "คงเหลือพร้อมขาย": 314, "เฉลี่ยขาย/วัน": 9.64, "จำนวนวันขาย": 32.56, "สถานะ": "ปกติ"}
-];
+let allItems = [];
+let state = { status: 'ทั้งหมด', q: '', sort: 'urgent' };
 
-const STATUS = {'ปรกติ':'ok','ปกติ':'ok','ใกล้หมด':'low','วิกฤต':'crit','หมด':'out'};
-const RANK = {out:0, crit:1, low:2, ok:3, na:4};
-const state = {items:[], status:'all', q:'', sort:'urgent'};
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num = v => Number(String(v ?? '').replace(/,/g, '')) || 0;
-const fmt = n => Number(n || 0).toLocaleString('th-TH', {maximumFractionDigits: 0});
-const fmt1 = n => Number(n || 0).toLocaleString('th-TH', {maximumFractionDigits: 1});
-const clean = v => { const s = String(v ?? '').replace(/\u00a0/g,' ').trim(); return (s === '' || s === '-') ? '' : s; };
+const STATUS_META = {
+  'หมด': { cls: 's-out', rank: 1 },
+  'วิกฤต': { cls: 's-crit', rank: 2 },
+  'ใกล้หมด': { cls: 's-low', rank: 3 },
+  'ปกติ': { cls: 's-ok', rank: 4 }
+};
 
-function imgUrl(v){
-  const u = clean(v); if(!u) return '';
-  const m = u.match(/drive\.google\.com\/file\/d\/([\w-]+)/) || u.match(/drive\.google\.com\/(?:open|uc)\?[^#]*id=([\w-]+)/);
-  return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w400' : u;
+function fmtNum(n, dec = 0) {
+  const num = Number(n);
+  if (isNaN(num)) return n || '-';
+  return num.toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 }
 
-function normalize(r){
-  const keys = Object.keys(r), a = keys.indexOf('ชื่อสินค้า'), b = keys.indexOf('เฉลี่ย 3 เดือนย้อนหลัง');
-  const months = (a >= 0 && b > a) ? keys.slice(a + 1, b).map(k => ({m: k, v: num(r[k])})) : [];
-  const label = String(r['สถานะ'] || '').trim();
-  return {
-    pid: clean(r['รหัสสินค้า']), code: clean(r['Code']), name: clean(r['ชื่อสินค้า']) || '(ไม่มีชื่อ)',
-    bc: clean(r['Barcode']), bc12: clean(r['Barcode (P.12)']), bc24: clean(r['Barcode (P.24)']), bc48: clean(r['Barcode (P.48)']),
-    avg3m: num(r['เฉลี่ย 3 เดือนย้อนหลัง']), qty: num(r['คงเหลือพร้อมขาย']),
-    rate: num(r['เฉลี่ยขาย/วัน']), days: num(r['จำนวนวันขาย']),
-    months: months,
-    img: imgUrl(r['URL รูป'] || r['รูป'] || r['Image']),
-    label: label, status: STATUS[label] || 'na'
-  };
+function getImgUrl(item) {
+  // 1. ดึงจากคอลัมน์ "รูปภาพ" หรือ "image" ใน Google Sheet ก่อน
+  const sheetImg = (item['รูปภาพ'] || item['Image'] || item['image'] || '').toString().trim();
+  if (sheetImg) return sheetImg;
+  // 2. ถ้าใน Sheet ไม่มี จะดึงไฟล์รูปชื่อตาม Code จาก GitHub (เช่น ./CJ-1.jpg)
+  const code = (item['Code'] || '').toString().trim();
+  return code ? `./${code}.jpg` : '';
 }
 
-function filtered(){
-  const q = state.q.trim().toLowerCase();
-  const rows = state.items.filter(p => {
-    const sOk = state.status === 'all' || p.status === state.status || (state.status === 'warn' && (p.status === 'low' || p.status === 'crit'));
-    const text = [p.name, p.pid, p.code, p.bc, p.bc12, p.bc24, p.bc48].join(' ').toLowerCase();
-    return sOk && (!q || text.includes(q));
-  });
-  const by = {
-    urgent:(a,b)=>RANK[a.status]-RANK[b.status] || a.days-b.days,
-    name:(a,b)=>a.name.localeCompare(b.name,'th'),
-    qty:(a,b)=>a.qty-b.qty,
-    rate:(a,b)=>b.rate-a.rate
-  };
-  return rows.sort(by[state.sort]);
-}
+function renderKPIs() {
+  const totalSku = allItems.length;
+  const totalQty = allItems.reduce((s, x) => s + (Number(x['คงเหลือพร้อมขาย']) || 0), 0);
+  const cLow = allItems.filter(x => x['สถานะ'] === 'ใกล้หมด').length;
+  const cCrit = allItems.filter(x => x['สถานะ'] === 'วิกฤต').length;
+  const cOut = allItems.filter(x => x['สถานะ'] === 'หมด').length;
 
-function renderKpis(){
-  const all = state.items, n = s => all.filter(p=>p.status===s).length;
-  const units = all.reduce((s,p)=>s+p.qty, 0);
-  const tiles = [
-    ['all','สินค้าทั้งหมด',fmt(all.length),'รายการ','k1 w3'],
-    ['units','พร้อมขายรวม',fmt(units),'กล่อง','k2 w3'],
-    ['low','ใกล้หมด',fmt(n('low')),'รายการ','low w2'],
-    ['crit','วิกฤต',fmt(n('crit')),'รายการ','crit w2'],
-    ['out','หมดแล้ว',fmt(n('out')),'รายการ','out w2']
+  const kpis = [
+    { key: 'ทั้งหมด', cls: 'k1 w3', label: 'รายการทั้งหมด', val: fmtNum(totalSku), unit: 'รายการ' },
+    { key: 'ทั้งหมด', cls: 'k2 w3', label: 'คงเหลือรวม', val: fmtNum(totalQty), unit: 'ชิ้น' },
+    { key: 'ใกล้หมด', cls: 'low w2', label: 'ใกล้หมด', val: fmtNum(cLow), unit: 'รายการ' },
+    { key: 'วิกฤต', cls: 'crit w2', label: 'วิกฤต', val: fmtNum(cCrit), unit: 'รายการ' },
+    { key: 'หมด', cls: 'out w2', label: 'สินค้าหมด', val: fmtNum(cOut), unit: 'รายการ' }
   ];
-  $('kpis').innerHTML = tiles.map(t =>
-    `<button class="kpi ${t[4]} ${state.status===t[0]?'on':''}" data-s="${t[0]}"><small>${t[1]}</small><b>${t[2]}</b> <span class="u">${t[3]}</span></button>`).join('');
-}
 
-function renderChips(){
-  const defs = [['all','ทั้งหมด'],['ok','ปกติ'],['low','ใกล้หมด'],['crit','วิกฤต'],['out','หมด']];
-  $('chips').innerHTML = defs.map(d => {
-    const c = d[0]==='all' ? state.items.length : state.items.filter(p=>p.status===d[0]).length;
-    return `<button class="chip ${state.status===d[0]?'on':''}" data-s="${d[0]}">${d[1]} ${fmt(c)}</button>`;
+  document.getElementById('kpis').innerHTML = kpis.map((k, idx) => {
+    const active = (idx > 0 && state.status === k.key) || (idx === 0 && state.status === 'ทั้งหมด') ? 'on' : '';
+    return `<button type="button" class="kpi ${k.cls} ${active}" onclick="setFilter('${k.key}')">
+      <small>${k.label}</small>
+      <b>${k.val} <span class="u">${k.unit}</span></b>
+    </button>`;
   }).join('');
 }
 
-function detail(label, value){ return value ? `<span>${label}</span><b>${esc(value)}</b>` : ''; }
-
-function renderList(){
-  const rows = filtered();
-  $('count').textContent = `แสดง ${fmt(rows.length)} จากทั้งหมด ${fmt(state.items.length)} รายการ`;
-  if(!rows.length){ $('list').innerHTML = '<div class="empty">ไม่พบสินค้าที่ตรงกับตัวกรอง ลองล้างคำค้นหาหรือเลือกสถานะอื่น</div>'; return; }
-  $('list').innerHTML = rows.map(p => `
-    <details>
-      <summary>
-        <div class="thumb">📦${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</div>
-        <div class="info"><div class="name">${esc(p.name)}</div>
-          <div class="meta">${esc(p.code)}${p.code && p.rate ? ' · ' : ''}${p.rate ? 'ขายเฉลี่ย ' + fmt1(p.rate) + '/วัน' : ''}${p.qty > 0 && p.days ? ' · พอขาย ~' + fmt(p.days) + ' วัน' : ''}</div></div>
-        <div class="right"><div class="qty">${fmt(p.qty)} <small>กล่อง</small></div><span class="tag s-${p.status}">${esc(p.label || 'ไม่ระบุ')}</span></div>
-      </summary>
-      <div class="more">
-        ${detail('รหัสสินค้า', p.pid)}${detail('Code', p.code)}${detail('Barcode', p.bc)}
-        ${detail('Barcode (P.12)', p.bc12)}${detail('Barcode (P.24)', p.bc24)}${detail('Barcode (P.48)', p.bc48)}
-        ${p.months.map(x => detail('ยอดขาย ' + x.m, fmt(x.v))).join('')}${detail('เฉลี่ย 3 เดือนย้อนหลัง', fmt1(p.avg3m))}
-      </div>
-    </details>`).join('');
+function renderChips() {
+  const tabs = ['ทั้งหมด', 'วิกฤต', 'ใกล้หมด', 'หมด', 'ปกติ'];
+  document.getElementById('chips').innerHTML = tabs.map(t => {
+    const cnt = t === 'ทั้งหมด' ? allItems.length : allItems.filter(x => x['สถานะ'] === t).length;
+    return `<button type="button" class="chip ${state.status === t ? 'on' : ''}" onclick="setFilter('${t}')">${t} (${cnt})</button>`;
+  }).join('');
 }
 
-function render(){ renderKpis(); renderChips(); renderList(); }
+function setFilter(status) {
+  state.status = status;
+  renderKPIs();
+  renderChips();
+  renderList();
+}
 
-$('kpis').addEventListener('click', e => {
-  const b = e.target.closest('.kpi'); if(!b) return;
-  const s = b.dataset.s;
-  state.status = (s === 'units' || s === state.status) ? 'all' : s;
-  render();
-});
-$('chips').addEventListener('click', e => {
-  const b = e.target.closest('.chip'); if(!b) return;
-  state.status = b.dataset.s; render();
-});
-$('q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
-$('sort').addEventListener('change', e => { state.sort = e.target.value; renderList(); });
+function renderList() {
+  const kw = state.q.trim().toLowerCase();
+  let items = allItems.filter(x => {
+    if (state.status !== 'ทั้งหมด' && x['สถานะ'] !== state.status) return false;
+    if (!kw) return true;
+    const text = `${x['ชื่อสินค้า'] || ''} ${x['Code'] || ''} ${x['รหัสสินค้า'] || ''} ${x['Barcode'] || ''}`.toLowerCase();
+    return text.includes(kw);
+  });
 
-async function load(){
-  try{
-    if(CONFIG.LIFF_ID){ await liff.init({liffId: CONFIG.LIFF_ID}); }
-  }catch(err){ console.warn('LIFF init failed', err); }
-  try{
-    let rows, updated = new Date();
-    if(CONFIG.API_URL){
-      const res = await fetch(CONFIG.API_URL);
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      rows = data.products || [];
-      if(data.updatedAt) updated = new Date(data.updatedAt);
-    }else{
-      rows = DEMO; $('demo').hidden = false;
+  items.sort((a, b) => {
+    if (state.sort === 'urgent') {
+      const ra = (STATUS_META[a['สถานะ']] || { rank: 9 }).rank;
+      const rb = (STATUS_META[b['สถานะ']] || { rank: 9 }).rank;
+      if (ra !== rb) return ra - rb;
+      return (Number(a['จำนวนวันขาย']) || 0) - (Number(b['จำนวนวันขาย']) || 0);
     }
-    state.items = rows.map(normalize);
-    $('upd').textContent = 'อัปเดต ' + updated.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) + ' น.';
-    render();
-  }catch(err){
-    $('list').innerHTML = '<div class="err">โหลดข้อมูลไม่สำเร็จ ตรวจสอบ API_URL และสิทธิ์ของ Web app แล้วลองใหม่</div>';
+    if (state.sort === 'name') return (a['ชื่อสินค้า'] || '').localeCompare(b['ชื่อสินค้า'] || '', 'th');
+    if (state.sort === 'qty') return (Number(a['คงเหลือพร้อมขาย']) || 0) - (Number(b['คงเหลือพร้อมขาย']) || 0);
+    if (state.sort === 'rate') return (Number(b['เฉลี่ยขาย/วัน']) || 0) - (Number(a['เฉลี่ยขาย/วัน']) || 0);
+    return 0;
+  });
+
+  document.getElementById('count').textContent = `แสดง ${items.length} จาก ${allItems.length} รายการ`;
+
+  const listEl = document.getElementById('list');
+  if (!items.length) {
+    listEl.innerHTML = `<div class="empty">ไม่พบรายการสินค้าที่ค้นหา</div>`;
+    return;
   }
-}
-load();
-</script>
-</body>
-</html>
+
+  listEl.innerHTML = items.map(item => {
+    const st = item['สถานะ'] || 'ปกติ';
+    const meta = STATUS_META[st] || { cls: 's-na' };
+    const imgUrl = getImgUrl(item);
+    const imgTag = imgUrl ? `<img src="${imgUrl}" alt="" loading="lazy" onerror="this.remove()">` : '';
+
+    return `<details>
+      <summary>
+        <div class="thumb">📦${imgTag}</div>
+        <div class="info">
+          <div class="name">${item['ชื่อสินค้า'] || '-'}</div>
+          <div class="meta">${item['Code'] || '-'} • ขายเฉลี่ย ${fmtNum(item['เฉลี่ยขาย/วัน'], 1)}/วัน (${fmtNum(item['จำนวนวันขาย'], 0)} วัน)</div>
+        </div>
+        <div class="right">
