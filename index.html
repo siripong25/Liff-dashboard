@@ -73,12 +73,8 @@ summary::-webkit-details-marker{display:none}
   <div class="list" id="list"><div class="empty">กำลังโหลดข้อมูล…</div></div>
 </div>
 
-<script src="https://line-scdn.net"></script>
 <script>
-const CONFIG = {
-  LIFF_ID: '',
-  API_URL: 'https://google.com'
-};
+const API_URL = 'https://google.com';
 
 let allItems = [];
 let state = { status: 'ทั้งหมด', q: '', sort: 'urgent' };
@@ -197,3 +193,4 @@ function renderList() {
       </summary>
       <div class="more">
         <span>รหัสสินค้า</span><b>${(item['รหัสสินค้า'] || '-').toString().trim() || '-'}</b>
+        <span>Barcode</span><b>${item['Barcode'] || '-'}</b>
